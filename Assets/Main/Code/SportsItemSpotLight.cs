@@ -8,12 +8,17 @@ public class SportsItemSpotLight : MonoBehaviour
     [SerializeField] private float height;
     private Transform myTransform;
 
-    private void Start()
+    void Update()
+    {
+        GoHome();
+    }
+
+    private void Awake()
     {
         myTransform = transform;
     }
 
-    void Update()
+    public void GoHome()
     {
         Vector3 newPosition = target.position;
         newPosition.y = height;

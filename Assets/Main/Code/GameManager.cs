@@ -17,14 +17,12 @@ public class GameManager : MonoBehaviour
         StartCoroutine(StartScene());
     }
 
-    private float projectorTimeInterval = 0.25f;
-    private float projectorSoundDelay = 0.1f;
+    [SerializeField] private float projectorTimeInterval = 0.25f;
+    [SerializeField] private float projectorSoundDelay = 0.2f;
     [SerializeField] private AudioSource projectorSound;
 
-    [SerializeField] private TextEffect text;
     private IEnumerator StartScene()
     {
-        text.Print();
         HoldableItem[] sportsItems = FindObjectsOfType<HoldableItem>();
         HoldableItem[] sortedSportsItems = new HoldableItem[sportsItems.Length];
 
@@ -35,16 +33,23 @@ public class GameManager : MonoBehaviour
             sortedSportsItems[item.priority] = item;
         }
 
+        yield return new WaitForSeconds(0.2f);
+
         for (int i = 0; i < sortedSportsItems.Length; i++)
         {
+            StartCoroutine(InitialiseSportsItem(sortedSportsItems[i]));
             yield return new WaitForSeconds(projectorTimeInterval);
-            Instantiate(projectorSound);
-           // projectorSound.Play();
-            yield return new WaitForSeconds(projectorSoundDelay);
 
-            SportsItemSpotLight spotLight = Instantiate(sportsItemSpotLightPreFab);
-            spotLight.target = sortedSportsItems[i].transform;
-            sortedSportsItems[i].rigidbody.isKinematic = false;
         }
+    }
+
+    private IEnumerator InitialiseSportsItem(HoldableItem item)
+    {
+        Instantiate(projectorSound);
+        yield return new WaitForSeconds(projectorSoundDelay);
+        SportsItemSpotLight spotLight = Instantiate(sportsItemSpotLightPreFab);
+        spotLight.target = item.transform;
+        spotLight.GoHome();
+        item.rigidbody.isKinematic = false;
     }
 }

@@ -102,9 +102,14 @@ public class MouseController : MonoBehaviour
 
         myHeldItem = item;
     }
+
+
     private void ReleaseItem()
     {
         myHeldItem.rigidbody.isKinematic = false;
+        myHeldItem.Torque();
         myHeldItem = null;
     }
+
+
 }
