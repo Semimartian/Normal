@@ -1,0 +1,120 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ClockBase : MonoBehaviour
+{
+    const int NUMBER_OF_NUMBERS = 60;
+    static int ANGLE_INCREMENT = 360 / NUMBER_OF_NUMBERS;
+
+    [SerializeField] private RotatableNumber rotatableNumberPreFab;
+    [SerializeField] private float numberDistanceFromBase = 1;
+    [SerializeField] private float textSize = 1f;
+    private const string MOUSE_Y_AXIS = "Mouse Y";
+    //private RotatableNumber[] rotatableNumbers;
+    private Transform myTransform;
+    private float currentWheelVelocity;
+    [SerializeField] private float mouseVelocityMultiplier = 10;
+    [SerializeField] private float velocityLossPerSecond = 1;
+
+    private void Start()
+    {
+        myTransform = this.transform;
+        SpawnNumbers();
+    }
+
+    private void SpawnNumbers()
+    {
+        for (int i = 0; i < NUMBER_OF_NUMBERS; i++)
+        {
+            RotatableNumber number = Instantiate(rotatableNumberPreFab);
+            Transform numberTransform = number.transform;
+            numberTransform.position = this.transform.position;
+
+            numberTransform.rotation = Quaternion.Euler(i* ANGLE_INCREMENT, 0, 0);
+            numberTransform.position -= (numberTransform.forward)* numberDistanceFromBase;
+            numberTransform.parent = myTransform;
+
+            int numberNum = Mathf.Abs(NUMBER_OF_NUMBERS - i) -1;
+            number.textMesh.text =
+                (numberNum > 9) ? numberNum.ToString() : "0" + numberNum.ToString();
+            number.textMesh.fontSize = textSize;
+        }
+    }
+
+    private void Update()
+    {
+
+        float deltaTime = Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            CorrectAngle();
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            float mouseYMovement = Input.GetAxisRaw(MOUSE_Y_AXIS);
+            currentWheelVelocity = mouseYMovement * mouseVelocityMultiplier;
+
+            float absoluteWheelVelocity = Math.Abs(currentWheelVelocity);
+            if (absoluteWheelVelocity < 1)
+            {
+                CorrectAngle();
+                currentWheelVelocity = 0;
+
+            }
+            //if (mouseYMovement)
+        }
+
+
+        else if(currentWheelVelocity !=0)
+        {
+            float absoluteWheelVelocity = Math.Abs(currentWheelVelocity);
+            if (absoluteWheelVelocity < 1)
+            {
+                CorrectAngle();
+                currentWheelVelocity = 0;
+
+            }
+            else
+            {
+                float velocityLoss = velocityLossPerSecond * deltaTime;
+                if (absoluteWheelVelocity - velocityLoss < 0)
+                {
+                    CorrectAngle();
+                    currentWheelVelocity = 0;
+                }
+                else
+                {
+                    float multiplier = (currentWheelVelocity > 0 ? 1 : -1);
+                    currentWheelVelocity -= (velocityLoss * multiplier);
+                }
+            }
+
+        }
+
+        Vector3 rotation = new Vector3
+            (currentWheelVelocity * deltaTime, 0,0);
+        myTransform.Rotate(rotation);
+
+    }
+
+    private void CorrectAngle()
+    {
+        //float myAngle = Vector3.ang(myTransform.forward, Vector3.forward);
+        // float myAngle = myTransform.eulerAngles.x;
+        float myAngle = Vector3.SignedAngle(myTransform.forward, Vector3.forward, Vector3.left);
+        if (myAngle < 0)
+        {
+            myAngle += 360;
+        }
+
+        Debug.Log("myAngle:" + myAngle);
+        float normalisedAngle = (Mathf.Round ( myAngle / (float)ANGLE_INCREMENT)) * ANGLE_INCREMENT;
+        Debug.Log("normalisedAngle:" + normalisedAngle);
+
+        myTransform.rotation = Quaternion.Euler(normalisedAngle, 0,0);
+
+    }
+}
