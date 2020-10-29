@@ -47,7 +47,9 @@ public class ClockBase : MonoBehaviour
             int numberNum = Mathf.Abs(numberOfActualNumbers - i) - 1;
 
             string s =
-           /* number.textMesh.text = */((numberNum > 9) ? numberNum.ToString() : "0" + numberNum.ToString());
+/* number.textMesh.text = */((numberNum > 9) ? numberNum.ToString() : "0" + numberNum.ToString());
+            //Debug.Log("i = " + i + "number = " + s);
+
             actualNumbersText[i] = s;
         }
 
@@ -59,7 +61,7 @@ public class ClockBase : MonoBehaviour
             Transform numberTransform = number.transform;
             numberTransform.position = this.transform.position;
 
-            numberTransform.rotation = Quaternion.Euler(i * angleIncrement, 0, 0);
+            numberTransform.rotation = Quaternion.Euler((i+1) * angleIncrement, 0, 0);//TODO:cheap fix might damage stuff
             numberTransform.position -= (numberTransform.forward)* numberDistanceFromBase;
             numberTransform.SetParent( myTransform);
 
@@ -137,6 +139,8 @@ public class ClockBase : MonoBehaviour
 
     }
 
+    //private float[] mouseVelocities = new float[4];
+    float mouseVelocity;
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.U))
@@ -168,16 +172,34 @@ public class ClockBase : MonoBehaviour
         else if (Input.GetMouseButtonUp(0))
         {
             mouseIsLockedOnMe = false ;
+            mouseVelocity = 0;
         }
 
 
        // Debug.Log("mousePosition"+ mousePosition);
         if (mouseIsLockedOnMe)
         {
-            float mouseYMovement = Input.GetAxisRaw(MOUSE_Y_AXIS) * mouseVelocityMultiplier * deltaTime;//TODOD: DeltaTime?
+            float mouseYMovement =
+                (Input.GetAxis(MOUSE_Y_AXIS) * mouseVelocityMultiplier ) ;//TODOD: DeltaTime?
+
+            bool isNegative = mouseYMovement < 0;
+            mouseYMovement *= mouseYMovement;
+            if (isNegative)
+            {
+                mouseYMovement = -mouseYMovement;
+            }
+            /*if (mouseVelocity != 0)
+            {
+                mouseVelocity = (mouseVelocity + mouseYMovement) / 2;
+            }
+            else
+            {
+                mouseVelocity =  mouseYMovement;
+            }*/
+            mouseVelocity = mouseYMovement;
             if (Math.Abs( mouseYMovement) > 0)
             {
-                currentWheelVelocity = mouseYMovement ;
+                currentWheelVelocity = mouseVelocity * deltaTime;
             }
            
         }
@@ -207,20 +229,22 @@ public class ClockBase : MonoBehaviour
             CheckNewPosition();
         }
 
-
-        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            Vector3 rotation = new Vector3(angleIncrement*2, 0, 0);
-            myTransform.Rotate(rotation);
-            CheckNewPosition();
-        }
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                Vector3 rotation = new Vector3(angleIncrement * 2, 0, 0);
+                myTransform.Rotate(rotation);
+                CheckNewPosition();
+            }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            Vector3 rotation = new Vector3(-angleIncrement*2, 0, 0);
-            myTransform.Rotate(rotation);
-            CheckNewPosition();
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                Vector3 rotation = new Vector3(-angleIncrement * 2, 0, 0);
+                myTransform.Rotate(rotation);
+                CheckNewPosition();
+            }
         }
+       
         /* else if(currentWheelVelocity !=0)
          {
              float absoluteWheelVelocity = Math.Abs(currentWheelVelocity);
@@ -365,8 +389,8 @@ public class ClockBase : MonoBehaviour
                     //SNAP
                     float snap = newPosition * angleIncrement;
                     myTransform.rotation = Quaternion.Euler(snap, 0, 0);
-                }
-                else
+                 }
+                 else
                  {
                      currentWheelVelocity += velocityLoss * (currentWheelVelocity < 0 ? 1 : -1);
                  }
