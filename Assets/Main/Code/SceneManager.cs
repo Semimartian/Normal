@@ -5,7 +5,7 @@ using UnityEngine;
 public class SceneManager : MonoBehaviour
 {
     private int sceneIndex;
-
+    private Vector3 movementPerFrame = new Vector3(1, 0, 0);
 
     // Start is called before the first frame update
     void Start()
@@ -24,6 +24,7 @@ public class SceneManager : MonoBehaviour
         {
             AdvanceScene();
         }
+
     }
     [SerializeField] private Phone iPhone;
 
@@ -51,7 +52,14 @@ public class SceneManager : MonoBehaviour
         }
         else if (sceneIndex == 3)
         {
-            textBubbleText.Print();
+            if (textBubbleText.enabled)
+            {
+                textBubbleText.Print();
+            }
+            else
+            {
+                AdvanceScene();
+            }
         }
         else  if (sceneIndex == 4)
         {
@@ -62,4 +70,8 @@ public class SceneManager : MonoBehaviour
             fadeMaskAnimator.SetTrigger("Fade");
         }
     }
+
+
+
+
 }
