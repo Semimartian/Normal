@@ -29,7 +29,6 @@ public class HoldableItem : MonoBehaviour
         {
             rigidbody.centerOfMass = centreOfMass.localPosition;
         }
-
     }
 
     [SerializeField] private Vector3 releaseTorque;
@@ -65,6 +64,10 @@ public class HoldableItem : MonoBehaviour
             float volume = Mathf.Lerp(0, 1, impact * 0.25f);
             //Debug.Log("volume: " +volume);
             audioSource.clip = clip;
+
+            audioSource.pitch = Random.Range(0.96f,1.04f);
+
+
             audioSource.volume = volume;
 
             audioSource.Play();
